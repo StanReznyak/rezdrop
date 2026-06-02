@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="topbar">
+  <a class="nav-brand" href="/"><span class="logo mini">RD</span><b>{{ app_name }}</b></a>
+  <div class="nav-links"><a href="/">Новая загрузка</a>{% if current_user %}<a href="/dashboard">Мои загрузки</a>{% else %}<a href="/login">Войти</a>{% endif %}</div>
+</nav>
+
+<section class="hero-card small-card">
+  <div class="brand-row space-between">
+    <div>
+      <div class="badge soft">Локальная история</div>
+      <h1 class="page-title">История загрузок</h1>
+      <p>Последние ссылки, созданные в этом браузере.</p>
+    </div>
+    <a class="ghost-btn" href="/">Загрузить ещё</a>
+  </div>
+
+  <div class="table-list table-list-main">
+    {% for batch in batches %}
+      <div class="history-card {% if batch.is_deleted or (batch.expires_at and batch.expires_at < now) %}muted-card{% endif %}">
+        <div>
+          <b>{{ batch.title or ('Ссылка ' ~ batch.code) }}</b>
+          <span>{{ batch.files_count }} файлов · {{ batch.total_size_bytes|human_size }} · {{ batch.created_at.strftime('%d.%m.%Y %H:%M') }} · {{ batch.expire_policy|expire_policy_label }}</span>
+        </div>
+        {% if batch.is_deleted or (batch.expires_at and batch.expires_at < now) %}
+          <span class="pill danger-pill">удалено/истекло</span>
+        {% else %}
+          <a class="ghost-btn slim2" href="/u/{{ batch.code }}">Открыть</a>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="empty-state">Загрузок пока нет. Вернись на главную и создай первую ссылку.</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

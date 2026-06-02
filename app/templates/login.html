@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="topbar">
+  <a class="nav-brand" href="/"><span class="logo mini">RD</span><b>{{ app_name }}</b></a>
+  <div class="nav-links"><a href="/">Главная</a><a href="/register">Регистрация</a></div>
+</nav>
+<section class="hero-card auth-card">
+  <div>
+    <div class="badge soft">Аккаунт</div>
+    <h1 class="page-title">Вход</h1>
+    <p>Войди, чтобы видеть свои загрузки в личном кабинете.</p>
+  </div>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form class="auth-form" action="/login" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Логин или email<input name="username" required autocomplete="username"></label>
+    <label>Пароль<input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="primary-btn" type="submit">Войти</button>
+  </form>
+  <p class="mini-hint">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
+</section>
+{% endblock %}

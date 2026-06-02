@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="topbar">
+  <a class="nav-brand" href="/"><span class="logo mini">RD</span><b>{{ app_name }}</b></a>
+  <div class="nav-links"><a href="/">Главная</a><a href="/admin">Админка</a></div>
+</nav>
+
+<section class="hero-card admin-card">
+  <div class="brand-row space-between">
+    <div>
+      <div class="badge soft">Управление файлами</div>
+      <h1 class="page-title">Панель администратора</h1>
+      <p>Статистика, активные ссылки, журнал скачиваний, ручная очистка и удаление загрузок.</p>
+    </div>
+    <form action="/admin/logout" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="ghost-btn" type="submit">Выйти</button>
+    </form>
+  </div>
+
+  <div class="admin-stats">
+    <div><b>{{ stats.total_batches }}</b><span>всего ссылок</span></div>
+    <div><b>{{ stats.active_batches }}</b><span>активных</span></div>
+    <div><b>{{ stats.expired_batches }}</b><span>просроченных</span></div>
+    <div><b>{{ stats.total_files }}</b><span>файлов</span></div>
+    <div><b>{{ stats.total_size|human_size }}</b><span>занято</span></div>
+    <div><b>{{ stats.downloads }}</b><span>скачиваний</span></div>
+    <div><b>{{ stats.users }}</b><span>пользователей</span></div>
+    <div><b>{{ stats.actions }}</b><span>действий</span></div>
+  </div>
+
+  {% if cleanup_message %}
+    <div class="admin-notice">{{ cleanup_message }}</div>
+  {% endif %}
+
+  <form action="/admin/cleanup" method="post" class="admin-actions">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button class="primary-btn slim" type="submit">Очистить просроченные</button>
+    <span class="cleanup-help">Очистка удаляет только истёкшие ссылки. Активные ссылки удаляются кнопкой «Удалить».</span>
+  </form>
+
+  <h2 class="section-title">Ссылки</h2>
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Ссылка</th><th>Пользователь</th><th>Файлы</th><th>Размер</th><th>Срок</th><th>IP</th><th>Статус</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for batch in batches %}
+          <tr>
+            <td><a href="/u/{{ batch.code }}">{{ batch.title or batch.code }}</a><small>{{ batch.created_at.strftime('%d.%m.%Y %H:%M') }}</small></td>
+            <td>{{ batch.user.username if batch.user else "аноним" }}</td>
+            <td>{{ batch.files_count }}</td>
+            <td>{{ batch.total_size_bytes|human_size }}</td>
+            <td>{{ batch.expire_policy|expire_policy_label }}</td>
+            <td>{{ batch.ip_address or '-' }}</td>
+            <td>
+              {% if batch.is_deleted %}<span class="pill danger-pill">удалено</span>
+              {% elif batch.expires_at and batch.expires_at < now %}<span class="pill danger-pill">истекло</span>
+              {% else %}<span class="pill ok-pill">активно</span>{% endif %}
+            </td>
+            <td>
+              {% if not batch.is_deleted %}
+              <form action="/admin/batches/{{ batch.code }}/delete" method="post" onsubmit="return confirm('Удалить ссылку и файлы?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="danger-btn" type="submit">Удалить</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8">Загрузок пока нет.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="admin-two-columns">
+    <div>
+      <h2 class="section-title">Последние скачивания</h2>
+      <div class="mini-log-list">
+        {% for item in recent_downloads %}
+          <div class="mini-log-row">
+            <b>скачивание</b>
+            <span>{{ item.created_at.strftime('%d.%m.%Y %H:%M') }} · ссылка #{{ item.batch_id }} · {{ item.ip_address or '-' }}</span>
+          </div>
+        {% else %}
+          <div class="empty-state small-empty">Скачиваний пока нет.</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div>
+      <h2 class="section-title">Последние очистки</h2>
+      <div class="mini-log-list">
+        {% for item in recent_cleanups %}
+          <div class="mini-log-row">
+            <b>очистка</b>
+            <span>{{ item.created_at.strftime('%d.%m.%Y %H:%M') }} · удалено: {{ item.deleted_batches }}</span>
+          </div>
+        {% else %}
+          <div class="empty-state small-empty">Очистка ещё не запускалась.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+    <div>
+      <h2 class="section-title">Журнал действий</h2>
+      <div class="mini-log-list">
+        {% for item in recent_actions %}
+          <div class="mini-log-row">
+            <b>действие</b>
+            <span>{{ item.created_at.strftime('%d.%m.%Y %H:%M') }} · {{ item.user.username if item.user else 'гость/админ' }} · {{ item.ip_address or '-' }}</span>
+          </div>
+        {% else %}
+          <div class="empty-state small-empty">Действий пока нет.</div>
+        {% endfor %}
+      </div>
+    </div>
+</section>
+{% endblock %}

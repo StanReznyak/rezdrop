@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-card login-card">
+  <div class="brand-row compact">
+    <div class="logo">RD</div>
+    <div>
+      <h1>Админка</h1>
+      <p>Вход для владельца RezDrop.</p>
+    </div>
+  </div>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form class="login-form" action="/admin/login" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Логин<input name="username" autocomplete="username" required></label>
+    <label>Пароль<input type="password" name="password" autocomplete="current-password" required></label>
+    <button class="primary-btn" type="submit">Войти</button>
+  </form>
+  <p class="hint">Данные входа задаются в файле .env.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Local config and secrets
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# Runtime data
+uploads/*
+!uploads/.gitkeep
+storage/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Test/cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE/OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Docker/local
+docker-data/
+postgres-data/

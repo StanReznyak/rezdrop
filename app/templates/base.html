@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RezDrop — небольшой файлообменник на FastAPI с короткими ссылками, паролями, сроками хранения, ZIP-скачиванием и админкой.">
+  <title>{{ app_name }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-one"></div>
+  <div class="bg-glow bg-glow-two"></div>
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

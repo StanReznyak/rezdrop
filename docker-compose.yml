@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: rezdrop_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rezdrop
+      POSTGRES_USER: rezdrop
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_db_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - rezdrop_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rezdrop -d rezdrop"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    container_name: rezdrop_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-rezdrop}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-change_me_minio_password}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - rezdrop_minio:/data
+
+  app:
+    build: .
+    container_name: rezdrop_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - rezdrop_uploads:/app/uploads
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  rezdrop_pgdata:
+  rezdrop_minio:
+  rezdrop_uploads:

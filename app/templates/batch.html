@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="topbar">
+  <a class="nav-brand" href="/"><span class="logo mini">RD</span><b>{{ app_name }}</b></a>
+  <div class="nav-links"><a href="/history">История</a>{% if current_user %}<a href="/dashboard">Мои загрузки</a>{% endif %}<a href="/">Новая загрузка</a></div>
+</nav>
+
+<section class="hero-card small-card result-page">
+  <div class="result-header">
+    <div class="brand-row compact">
+      <div class="logo">RD</div>
+      <div>
+        <div class="badge soft">Ссылка готова</div>
+        <h1 class="page-title">{{ batch.title or 'Файлы готовы к отправке' }}</h1>
+        <p>Скопируй ссылку и отправь её кому надо. Файлы можно скачать по отдельности или одним ZIP-архивом.</p>
+      </div>
+    </div>
+    <span class="badge soft">{{ batch.expire_policy|expire_policy_label }}</span>
+  </div>
+
+  {% if locked %}
+    <div class="lock-box lock-box-main">
+      <h2>🔒 Ссылка защищена паролем</h2>
+      <p>Автор загрузки закрыл доступ паролем. Введи его, чтобы открыть список файлов.</p>
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+      <form action="/u/{{ batch.code }}/unlock" method="post" class="unlock-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="password" name="password" placeholder="Пароль" required autofocus>
+        <button class="primary-btn" type="submit">Открыть</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="result-box result-box-main">
+      <label>Публичная ссылка</label>
+      <div class="link-tools result-link-tools">
+        <input id="shareUrl" value="{{ public_url }}" readonly>
+        <button class="ghost-btn" type="button" onclick="copyShareUrl()">Скопировать</button>
+        <a class="ghost-btn" href="{{ public_url }}" target="_blank">Открыть</a>
+      </div>
+      <div id="copyToast" class="copy-toast" hidden>Ссылка скопирована</div>
+    </div>
+
+    <div class="metric-grid">
+      <div><b>{{ batch.files_count or active_files|length }}</b><span>файлов</span></div>
+      <div><b>{{ batch.total_size_bytes|human_size }}</b><span>общий размер</span></div>
+      <div><b>{{ batch.download_count }}</b><span>скачиваний</span></div>
+      <div><b>{{ 'да' if batch.password_hash else 'нет' }}</b><span>пароль</span></div>
+    </div>
+
+    <div class="meta-row meta-row-main">
+      <span>Создано: {{ batch.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+      <span>Истекает: {{ batch.expires_at.strftime('%d.%m.%Y %H:%M') if batch.expires_at else 'нет срока' }}</span>
+      <span>Код ссылки: {{ batch.code }}</span>
+    </div>
+
+    <div class="actions-row">
+      {% if active_files|length > 1 %}
+        <a class="primary-btn big-action" href="/u/{{ batch.code }}/download.zip">Скачать всё ZIP</a>
+      {% endif %}
+      <a class="ghost-btn big-action" href="/">Загрузить ещё</a>
+    </div>
+
+    <div class="downloads downloads-main">
+      {% for file in active_files %}
+        <div class="file-card">
+          <div>
+            <b>{{ file.original_name }}</b>
+            <span>{{ file.size_bytes|human_size }} · скачиваний: {{ file.download_count }}</span>
+          </div>
+          <a class="primary-btn slim" href="/f/{{ file.id }}">Скачать</a>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if batch.expire_policy == '1_download' %}
+      <p class="warning">Режим “1 скачивание”: после первого скачивания вся ссылка будет удалена.</p>
+    {% endif %}
+  {% endif %}
+</section>
+<script>
+function copyShareUrl() {
+  const input = document.getElementById('shareUrl');
+  const toast = document.getElementById('copyToast');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value);
+  if (toast) {
+    toast.hidden = false;
+    setTimeout(() => toast.hidden = true, 1800);
+  }
+}
+</script>
+{% endblock %}

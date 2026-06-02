@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="topbar">
+  <a class="nav-brand" href="/"><span class="logo mini">RD</span><b>{{ app_name }}</b></a>
+  <div class="nav-links"><a href="/">Главная</a><a href="/login">Войти</a></div>
+</nav>
+<section class="hero-card auth-card">
+  <div>
+    <div class="badge soft">Личный кабинет</div>
+    <h1 class="page-title">Регистрация</h1>
+    <p>Аккаунт нужен только для истории “Мои загрузки”. Публичные ссылки всё равно открываются без входа.</p>
+  </div>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form class="auth-form" action="/register" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Логин<input name="username" required minlength="3" maxlength="40" autocomplete="username"></label>
+    <label>Email <span class="muted">необязательно</span><input type="email" name="email" autocomplete="email"></label>
+    <label>Пароль<input type="password" name="password" required minlength="6" autocomplete="new-password"></label>
+    <button class="primary-btn" type="submit">Создать аккаунт</button>
+  </form>
+  <p class="mini-hint">Уже есть аккаунт? <a href="/login">Войти</a></p>
+</section>
+{% endblock %}

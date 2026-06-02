@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="topbar">
+  <a class="nav-brand" href="/"><span class="logo mini">RD</span><b>{{ app_name }}</b></a>
+  <div class="nav-links">
+    <a href="/">Главная</a>
+    <a href="/history">История</a>
+    {% if current_user %}
+      <a href="/dashboard">Мои загрузки</a>
+      <form action="/logout" method="post" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="link-button" type="submit">Выйти</button>
+      </form>
+    {% else %}
+      <a href="/login">Войти</a>
+      <a href="/register">Регистрация</a>
+    {% endif %}
+  </div>
+</nav>
+
+<section class="hero-card upload-layout main-hero home-hero-main">
+  <div class="hero-copy home-hero-copy">
+    <div class="badge">Без регистрации · ссылка за пару кликов</div>
+    <h1 class="hero-title">Передай файлы по ссылке</h1>
+    <p class="hero-lead">Загрузи файлы, выбери срок хранения, при необходимости поставь пароль — и отправь готовую ссылку.</p>
+
+    <div class="quick-stats compact-stats public-pills">
+      <span>до {{ max_upload_mb }} МБ на файл</span>
+      <span>пароль на ссылку</span>
+      <span>1 скачивание / 1–14 дней</span>
+      <span>скачать всё ZIP</span>
+    </div>
+    {% if current_user %}
+      <p class="mini-hint">Ты вошёл как <b>{{ current_user.username }}</b>. Новые загрузки попадут в личный кабинет.</p>
+    {% else %}
+      <p class="mini-hint">Можно загрузить без аккаунта. Зарегистрируйся, чтобы видеть все свои ссылки в личном кабинете.</p>
+    {% endif %}
+  </div>
+
+  <form id="uploadForm" class="upload-form panel upload-panel" action="/upload" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="dropzone" id="dropzone">
+      <input id="fileInput" type="file" name="files" multiple required>
+      <span class="drop-icon">⇧</span>
+      <strong>Перетащи файлы сюда</strong>
+      <small>или нажми, чтобы выбрать файлы</small>
+    </label>
+
+    <div id="fileList" class="file-list empty">Файлы пока не выбраны</div>
+
+    <div class="form-grid">
+      <label>
+        Название ссылки
+        <input type="text" name="title" maxlength="255" placeholder="Например: документы для клиента">
+      </label>
+      <label>
+        Срок хранения
+        <select name="expires_in">
+          <option value="1_download">1 скачивание</option>
+          <option value="1_day">1 день</option>
+          <option value="3_days" selected>3 дня</option>
+          <option value="7_days">7 дней</option>
+          <option value="14_days">14 дней</option>
+        </select>
+      </label>
+      <label class="full">
+        Пароль на ссылку
+        <input type="password" name="password" placeholder="Можно оставить пустым">
+      </label>
+    </div>
+
+    <button class="primary-btn" type="submit">Загрузить и получить ссылку</button>
+
+    <div class="progress-wrap" id="progressWrap" hidden>
+      <div class="progress-bar"><span id="progressBar"></span></div>
+      <small id="progressText">Загрузка...</small>
+    </div>
+  </form>
+</section>
+<script src="/static/app.js"></script>
+{% endblock %}

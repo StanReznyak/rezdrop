@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="topbar">
+  <a class="nav-brand" href="/"><span class="logo mini">RD</span><b>{{ app_name }}</b></a>
+  <div class="nav-links">
+    <a href="/">Новая загрузка</a>
+    <a href="/history">История браузера</a>
+    <form action="/logout" method="post" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="link-button" type="submit">Выйти</button>
+    </form>
+  </div>
+</nav>
+
+<section class="hero-card small-card">
+  <div class="brand-row space-between">
+    <div>
+      <div class="badge soft">{{ current_user.username }}</div>
+      <h1 class="page-title">Мои загрузки</h1>
+      <p>Здесь хранятся ссылки, созданные после входа в аккаунт.</p>
+    </div>
+    <a class="ghost-btn" href="/">Загрузить файл</a>
+  </div>
+
+  <div class="table-list table-list-main">
+    {% for batch in batches %}
+      <div class="history-card {% if batch.is_deleted or (batch.expires_at and batch.expires_at < now) %}muted-card{% endif %}">
+        <div>
+          <b>{{ batch.title or ('Ссылка ' ~ batch.code) }}</b>
+          <span>{{ batch.files_count }} файлов · {{ batch.total_size_bytes|human_size }} · {{ batch.created_at.strftime('%d.%m.%Y %H:%M') }} · {{ batch.expire_policy|expire_policy_label }}</span>
+        </div>
+        <div class="row-actions">
+          {% if batch.is_deleted or (batch.expires_at and batch.expires_at < now) %}
+            <span class="pill danger-pill">удалено/истекло</span>
+          {% else %}
+            <a class="ghost-btn slim2" href="/u/{{ batch.code }}">Открыть</a>
+            <form action="/dashboard/batches/{{ batch.code }}/delete" method="post" onsubmit="return confirm('Удалить ссылку и файлы?')">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="danger-btn slim-danger" type="submit">Удалить</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-state">Загрузок пока нет. Создай первую ссылку на главной.</div>
+    {% endfor %}
+  </div>
+
+  <h2 class="section-title">Последние действия</h2>
+  <div class="mini-log-list">
+    {% for item in activities %}
+      <div class="mini-log-row"><b>действие</b><span>{{ item.created_at.strftime('%d.%m.%Y %H:%M') }} · {{ item.details or '' }}</span></div>
+    {% else %}
+      <div class="empty-state small-empty">Действий пока нет.</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
