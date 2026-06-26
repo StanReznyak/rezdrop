@@ -15,7 +15,7 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label>Логин<input name="username" required minlength="3" maxlength="40" autocomplete="username"></label>
     <label>Email <span class="muted">необязательно</span><input type="email" name="email" autocomplete="email"></label>
-    <label>Пароль<input type="password" name="password" required minlength="6" autocomplete="new-password"></label>
+    <label>Пароль<input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
     <button class="primary-btn" type="submit">Создать аккаунт</button>
   </form>
   <p class="mini-hint">Уже есть аккаунт? <a href="/login">Войти</a></p>
