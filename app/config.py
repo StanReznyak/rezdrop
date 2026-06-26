@@ -90,7 +90,7 @@ class Settings:
         weak_secret_values = {"dev-change-me", "dev-local-change-me", "CHANGE_ME_LONG_RANDOM_SECRET", "test-app-secret-key-123456"}
         if self.secret_key in weak_secret_values or len(self.secret_key) < 32:
             raise RuntimeError("Production mode requires a strong APP_SECRET_KEY with at least 32 characters")
-        if not self.admin_password_hash and self.admin_password in {"change_me_admin_password", "password", "password123", "qwerty123"}:
+        if not self.admin_password_hash and self.admin_password in {"change-me-local-password", "change_me_admin_password", "password", "password123", "qwerty123"}:
             raise RuntimeError("Production mode requires a strong ADMIN_PASSWORD or ADMIN_PASSWORD_HASH")
         if self.storage_backend == "s3" and self.s3_secret_key in {"rezdrop_password", "change_me_minio_password", "password"}:
             raise RuntimeError("Production mode requires a strong S3_SECRET_KEY")
